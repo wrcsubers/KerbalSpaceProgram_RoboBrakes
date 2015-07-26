@@ -1,0 +1,5 @@
+- Add control to enable SAS reset upon landing.  This will help stabilize the craft upon touchdown.
+
+- Look into thrust reverse compatibility.
+
+- Add persistence to save Robo Brakes settings for each ship
