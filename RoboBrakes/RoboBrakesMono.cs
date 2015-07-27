@@ -3,8 +3,10 @@
 //=====================================================================================
 // The MIT License (MIT)
 // 
-// Copyright (c) 2015 WRCsubeRS
+// RoboBrakes - Copyright (c) 2015 WRCsubeRS
 // 
+// RoboBrakes - A Mod for Kerbal Space Program by Squad
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
@@ -25,6 +27,9 @@
 // 
 //=====================================================================================
 //=====================================================================================
+//
+// Version 0.1 - Initial Release
+//
 
 using System;
 using System.Collections;
@@ -200,7 +205,7 @@ namespace RoboBrakes
 		{
 			GUI.skin.window.richText = true;
 			if (FlightGlobals.ActiveVessel.state == Vessel.State.ACTIVE && ShowMainGUI == true) {
-				RoboBrakes_GUIOn = GUI.Window (15844, RoboBrakes_GUIOn, MainGUI, "<b>Robo Brakes</b>");
+				RoboBrakes_GUIOn = GUI.Window (15844, RoboBrakes_GUIOn, MainGUI, "<b>RoboBrakes</b>");
 			}
 		}
 
@@ -525,7 +530,7 @@ namespace RoboBrakes
 					//Create new Instance of ModuleRoboBrake to reference
 					ModuleRoboBrakes MRB = new ModuleRoboBrakes ();
 					MRB = SinglePart.FindModuleImplementing<ModuleRoboBrakes> ();
-					//Check to see if Robo Brakes are enabled on this part - This checks the UI part right click KSPField
+					//Check to see if RoboBrakes are enabled on this part - This checks the UI part right click KSPField
 					if (MRB.RoboBrakeEnabled == true) {
 						//---------------------------------------------------------------------------------------------------------------------
 						//Check to see if this is a landing gear (or other type for units after this)
