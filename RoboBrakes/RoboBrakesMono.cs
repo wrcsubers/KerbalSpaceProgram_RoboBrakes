@@ -122,10 +122,10 @@ namespace RoboBrakes
 		private void Awake ()
 		{
 			//Set Toolbar Textures and tell us when it's alive
-			if (GameDatabase.Instance.ExistsTexture ("PleiadesEngineering/Textures/ToolbarButtonIdle")) {
-				RoboBrakes_ButtonIdle = GameDatabase.Instance.GetTexture ("PleiadesEngineering/Textures/ToolbarButtonIdle", false);
-				RoboBrakes_ButtonArmed = GameDatabase.Instance.GetTexture ("PleiadesEngineering/Textures/ToolbarButtonArmed", false);
-				RoboBrakes_ButtonWarning = GameDatabase.Instance.GetTexture ("PleiadesEngineering/Textures/ToolbarButtonWarning", false);
+			if (GameDatabase.Instance.ExistsTexture ("RoboBrakes/Textures/ToolbarButtonIdle")) {
+				RoboBrakes_ButtonIdle = GameDatabase.Instance.GetTexture ("RoboBrakes/Textures/ToolbarButtonIdle", false);
+				RoboBrakes_ButtonArmed = GameDatabase.Instance.GetTexture ("RoboBrakes/Textures/ToolbarButtonArmed", false);
+				RoboBrakes_ButtonWarning = GameDatabase.Instance.GetTexture ("RoboBrakes/Textures/ToolbarButtonWarning", false);
 			}
 			GameEvents.onGUIApplicationLauncherReady.Add (OnGUIApplicationLauncherReady);
 		}
