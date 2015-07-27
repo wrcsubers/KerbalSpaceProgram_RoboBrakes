@@ -11,3 +11,5 @@ A to-do list of things to add/fix on Robo Brakes, in no particular order....
 - Add persistence to save Robo Brakes settings for each ship.
 
 - Add Disarm on Deactivate switch.
+
+- Add Parachute Deployment ability
