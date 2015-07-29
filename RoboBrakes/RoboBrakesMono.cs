@@ -28,7 +28,7 @@
 //=====================================================================================
 //=====================================================================================
 //
-// Version 0.1 - Initial Release
+// Version 0.1 - Initial Release - 07.27.2015
 //
 
 using System;
@@ -46,78 +46,118 @@ namespace RoboBrakes
 	[KSPAddon (KSPAddon.Startup.Flight, false)]
 	public class RoboBrakesMono : MonoBehaviour
 	{
+		//============================================================================================================================================
+		//Initialize Variables
+		//============================================================================================================================================
+		private ConfigNode RoboBrakes_SystemSettings;
+
 		private bool FirstRun = true;
 
-		//GUI
+		//GUI & Displays
+		//============================================================================================================================================
 		private bool ShowMainGUI = false;
+		//Main Window Size & Position
+		//---------------------------------------------------------------------------------------------------------------------
+		private static Rect RoboBrakes_MainGUI = new Rect ();
+		private float MainGUI_WindowTop = 5;
+		private float MainGUI_WindowLeft = ((Screen.width / 2) + 150);
+		private float MainGUI_WindowWidth = 200;
+		private float MainGUI_WindowHeight = 180;
 
-		private static Rect RoboBrakes_GUIOn = new Rect ();
-		private float GUI_WindowTop = 5;
-		private float GUI_WindowLeft = ((Screen.width / 2) + 150);
-		private float GUI_WindowWidth = 200;
-		private float GUI_WindowHeight = 180;
-
-		private string ArmedDisplay = "<b><color=#666666>Armed</color></b>";
 		private string ActiveDisplay;
 		private string RoboBrakes_GearDisplay;
 		private string RoboBrakes_AeroDisplay;
-		private string RoboBrakes_WarningDisplay;
 
-		private bool ShowSettings = false;
+		private string ArmedDisplay = "<b><color=#666666>Armed</color></b>";
+		private string RBSettings_DPDisplay = "<b><color=#33CC33>Chute</color></b>";
+		private string RBSettings_TZDisplay = "<b><color=#33CC33>Throttle 0</color></b>";
+		private string RBSettings_BKDisplay = "<b><color=#33CC33>Override</color></b>";
 
+		//Colors being used:
+		//Green: #33CC33
+		//Yellow: #E6E600
+		//Red: red
+		//Grey: #777777
+		//White: white
+
+		//Settings Window Size & Position
+		//---------------------------------------------------------------------------------------------------------------------
+		private bool ShowSettingsGUI = false;
+		private static Rect RoboBrakes_SettingsGUI = new Rect ();
+		private float SettingsGUI_WindowTop = 190;
+		private float SettingsGUI_WindowLeft = ((Screen.width / 2) + 150);
+		private float SettingsGUI_WindowWidth = 220;
+		private float SettingsGUI_WindowHeight = 220;
+		private float SelectionGridX;
+		private float SelectionGridY;
+
+		//Toolbar Textures & Setup
+		//---------------------------------------------------------------------------------------------------------------------
 		private ApplicationLauncherButton RoboBrakes_ToolbarButton = null;
 		private Texture2D RoboBrakes_ButtonIdle = new Texture2D (38, 38, TextureFormat.ARGB32, false);
 		private Texture2D RoboBrakes_ButtonArmed = new Texture2D (38, 38, TextureFormat.ARGB32, false);
-		private Texture2D RoboBrakes_ButtonWarning = new Texture2D (38, 38, TextureFormat.ARGB32, false);
 
-		//Timers
-		public static Timer Timer100 = new Timer (100);
+		//Settings - These get loaded/saved when plugin loads/unloads
+		//============================================================================================================================================
+		//ActivationSettings
+		private float DeactivationSpeed = 10.0f;
+		private float ActivationDelay = 0.5f;
+		//Brake Override Setting
+		private bool RBSettings_BKeyPress = true;
+		private bool RBSettings_BKeyToggle = false;
+		private bool RBSettings_BKeyOff = false;
+		//Throttle Zero Setting
+		private bool RBSettings_ThrottleZeroing = true;
+		//Enabled Parts
+		private bool RoboBrakes_AUTOGEAR = true;
+		private bool RoboBrakes_AUTOAERO = true;
+		private bool RoboBrakes_AUTOCHUTE = true;
+		private bool RoboBrakes_OVERRIDEGEAR = true;
+		private bool RoboBrakes_OVERRIDEAERO = true;
+		private bool RoboBrakes_OVERRIDECHUTE = false;
+
+		//Other Variables - These get set dynamically depending on the state of things
+		//============================================================================================================================================
+
+		//Setup Timers
+		//---------------------------------------------------------------------------------------------------------------------
+		private static Timer Timer100 = new Timer (100);
 		//Text Blinker
-		public bool BlinkText;
+		private bool BlinkText;
 		//Setup Multiple Timers
 		private float TimerTime1 = 0.0f;
 		private float TimerTime2 = 0.0f;
 		private bool TimerTime2Done = true;
 
 		//Vessel Info
+		//---------------------------------------------------------------------------------------------------------------------
 		private Vessel PreviousVessel;
-		private bool IsLanded;
 		private float GroundSpeed;
-
+		private bool IsLanded;
 		private bool LandedNow;
 		private bool LandedPrev;
 
-		//Settings
-		private float DeactivateSpeed = 10.0f;
-		private float ActivationDelay = 0.5f;
-		//private float BrakingForce = 100;
+		//Part Counts
+		//---------------------------------------------------------------------------------------------------------------------
+		private int PartCount = -1;
+		private List <Part> CapablePartList = new List <Part> ();
+		private int RoboBrakes_GearEnabledCount;
+		private int RoboBrakes_AeroEnabledCount;
+		private int RoboBrakes_ParaEnabledCount;
 
-		private bool RBSettings_BKeyPress = true;
-		private bool RBSettings_BKeyToggle = false;
-		private bool RBSettings_BKeyOff = false;
-		private string RBSettings_BKDisplay = "<b><color=#33CC33>'B'</color></b>";
-
-		private bool RBSettings_ThrottleZeroing = true;
-		private string RBSettings_TZDisplay = "<b><color=#33CC33>TZ</color></b>";
-
-		private bool RoboBrakes_BRAKEOVERIDE;
-
-		//Other
+		//Activation Stuff
+		//---------------------------------------------------------------------------------------------------------------------
 		private bool RoboBrakes_ARMED = false;
 		private bool RoboBrakes_ACTIVE = false;
 		private bool RoboBrakes_READYFORACTIVATION;
-		private bool RoboBrakes_WARNING = false;
-		//private bool RoboBrakes_ENABLEPARKINGBRAKE;
+		private bool RoboBrakes_BRAKEOVERRIDE;
 		private bool RoboBrakes_HASPARTENABLED;
-		private int PartCount = -1;
-		private List <Part> CapablePartList = new List <Part> ();
-		private List <string> ActiveBrakingPartNameList = new List <string> ();
+		private bool RoboBrakes_CHUTEREADY;
+		private bool RoboBrakes_CUTCHUTE;
 
-		private int RoboBrakes_GearWarningCount;
-		private int RoboBrakes_GearEnabledCount;
-		private int RoboBrakes_AeroEnabledCount;
-
-
+		//============================================================================================================================================
+		//Start Running Processes
+		//============================================================================================================================================
 		//This function gets called only once, during the KSP loading screen.
 		private void Awake ()
 		{
@@ -125,7 +165,6 @@ namespace RoboBrakes
 			if (GameDatabase.Instance.ExistsTexture ("RoboBrakes/Textures/ToolbarButtonIdle")) {
 				RoboBrakes_ButtonIdle = GameDatabase.Instance.GetTexture ("RoboBrakes/Textures/ToolbarButtonIdle", false);
 				RoboBrakes_ButtonArmed = GameDatabase.Instance.GetTexture ("RoboBrakes/Textures/ToolbarButtonArmed", false);
-				RoboBrakes_ButtonWarning = GameDatabase.Instance.GetTexture ("RoboBrakes/Textures/ToolbarButtonWarning", false);
 			}
 			GameEvents.onGUIApplicationLauncherReady.Add (OnGUIApplicationLauncherReady);
 		}
@@ -133,16 +172,44 @@ namespace RoboBrakes
 		//Called when the flight starts or in the editor. OnStart will be called before OnUpdate or OnFixedUpdate are ever called.
 		private void Start ()
 		{
+			RoboBrakes_SystemSettings = new ConfigNode ();
+			RoboBrakes_SystemSettings = ConfigNode.Load ("GameData/RoboBrakes/Config/RoboBrakes_PluginSettings.cfg");
+			if (RoboBrakes_SystemSettings != null) {
+				print ("ROBOBRAKES - Settings exist! Loading Values...");
+				//--------------------------------------------------------------------------------------------------
+				MainGUI_WindowTop = float.Parse (RoboBrakes_SystemSettings.GetValue ("MainGUI_WindowTop"));
+				MainGUI_WindowLeft = float.Parse (RoboBrakes_SystemSettings.GetValue ("MainGUI_WindowLeft"));
+				SettingsGUI_WindowTop = float.Parse (RoboBrakes_SystemSettings.GetValue ("SettingsGUI_WindowTop"));
+				SettingsGUI_WindowLeft = float.Parse (RoboBrakes_SystemSettings.GetValue ("SettingsGUI_WindowLeft"));
+				//--------------------------------------------------------------------------------------------------
+				DeactivationSpeed = float.Parse (RoboBrakes_SystemSettings.GetValue ("DeactivationSpeed"));
+				ActivationDelay = float.Parse (RoboBrakes_SystemSettings.GetValue ("ActivationDelay"));
+				RBSettings_BKeyPress = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RBSettings_BKeyPress"));
+				RBSettings_BKeyToggle = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RBSettings_BKeyToggle"));
+				RBSettings_BKeyOff = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RBSettings_BKeyOff"));
+				RBSettings_ThrottleZeroing = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RBSettings_ThrottleZeroing"));
+				//--------------------------------------------------------------------------------------------------
+				RoboBrakes_AUTOGEAR = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RoboBrakes_AUTOGEAR"));
+				RoboBrakes_AUTOAERO = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RoboBrakes_AUTOAERO"));
+				RoboBrakes_AUTOCHUTE = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RoboBrakes_AUTOCHUTE"));
+				RoboBrakes_OVERRIDEGEAR = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RoboBrakes_OVERRIDEGEAR"));
+				RoboBrakes_OVERRIDEAERO = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RoboBrakes_OVERRIDEAERO"));
+				RoboBrakes_OVERRIDECHUTE = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RoboBrakes_OVERRIDECHUTE"));
+				//--------------------------------------------------------------------------------------------------
+			} else {
+				print ("ROBOBRAKES - Settings don't exist! Creating new file with built in defaults...");
+				SaveSettings ();
+			}
 			RenderingManager.AddToPostDrawQueue (0, OnDraw);
-			RoboBrakes_GUIOn = new Rect (GUI_WindowLeft, GUI_WindowTop, GUI_WindowWidth, GUI_WindowHeight); //set window position
+			RoboBrakes_MainGUI = new Rect (MainGUI_WindowLeft, MainGUI_WindowTop, MainGUI_WindowWidth, MainGUI_WindowHeight); //set window position
+			RoboBrakes_SettingsGUI = new Rect (SettingsGUI_WindowLeft, SettingsGUI_WindowTop, SettingsGUI_WindowWidth, SettingsGUI_WindowHeight);
 			OnGUIApplicationLauncherReady ();
 
 			//Setup Timer for Text Blinking
 			Timer100.Elapsed += new ElapsedEventHandler (OnTimedEvent1);
 			Timer100.Enabled = true;
 		}
-
-
+			
 		//This is all GUI Stuff...
 		//============================================================================================================================================
 		//Create Toolbar Button if one doesn't already exist
@@ -173,52 +240,44 @@ namespace RoboBrakes
 		//Update the Toolbar Button when the status of RoboBrakes changes
 		private void UpdateToolbarButton ()
 		{
-			if (RoboBrakes_BRAKEOVERIDE == false) {
-				if (RoboBrakes_WARNING == false) {
-					if (RoboBrakes_ARMED == true) {
-						if (RoboBrakes_ACTIVE == true) {
-							if (BlinkText) {
-								RoboBrakes_ToolbarButton.SetTexture (RoboBrakes_ButtonArmed);
-							} else {
-								RoboBrakes_ToolbarButton.SetTexture (RoboBrakes_ButtonIdle);
-							}
-						} else {
+			if (RoboBrakes_BRAKEOVERRIDE == false) {
+				if (RoboBrakes_ARMED == true) {
+					if (RoboBrakes_ACTIVE == true) {
+						if (BlinkText) {
 							RoboBrakes_ToolbarButton.SetTexture (RoboBrakes_ButtonArmed);
+						} else {
+							RoboBrakes_ToolbarButton.SetTexture (RoboBrakes_ButtonIdle);
 						}
 					} else {
-						RoboBrakes_ToolbarButton.SetTexture (RoboBrakes_ButtonIdle);
+						RoboBrakes_ToolbarButton.SetTexture (RoboBrakes_ButtonArmed);
 					}
 				} else {
-					if (BlinkText) {
-						RoboBrakes_ToolbarButton.SetTexture (RoboBrakes_ButtonWarning);
-					} else {
-						RoboBrakes_ToolbarButton.SetTexture (RoboBrakes_ButtonIdle);
-					}
+					RoboBrakes_ToolbarButton.SetTexture (RoboBrakes_ButtonIdle);
 				}
 			} else {
 				RoboBrakes_ToolbarButton.SetTexture (RoboBrakes_ButtonArmed);
 			}
 		}
 
-		//This initializes the Main GUI Window
+		//This initializes the MainGUI & SettingsGUI Windows
 		private void OnDraw ()
 		{
 			GUI.skin.window.richText = true;
 			if (FlightGlobals.ActiveVessel.state == Vessel.State.ACTIVE && ShowMainGUI == true) {
-				RoboBrakes_GUIOn = GUI.Window (15844, RoboBrakes_GUIOn, MainGUI, "<b>RoboBrakes</b>");
+				RoboBrakes_MainGUI = GUI.Window (15844, RoboBrakes_MainGUI, MainGUI, "<b>RoboBrakes</b>");
+				if (ShowSettingsGUI == true) {
+					RoboBrakes_SettingsGUI = GUI.Window (15845, RoboBrakes_SettingsGUI, SettingsGUI, "<b>RoboBrakes - Settings</b>");
+				}
+			} else {
+				//Close the SettingsGUI window automatically if MainGUI isn't open
+				ShowSettingsGUI = false;
 			}
 		}
 
 		//============================================================================================================================================
 		//This sets up the MainGUI Window and lays out the entire GUI
 		private void MainGUI (int WindowID)
-		{   //Colors being used:
-			//Green: #33CC33
-			//Yellow: #E6E600
-			//Red: red
-			//Grey: #777777
-			//White: white
-
+		{   
 			GUI.skin.button.richText = true;
 			GUI.skin.button.fontSize = 14;
 			GUI.skin.box.fontSize = 16;
@@ -257,110 +316,133 @@ namespace RoboBrakes
 			GUI.skin.box.fontSize = 12;
 			GUI.Box (new Rect (25, 80, 150, 20), RoboBrakes_AeroDisplay);
 			GUI.Box (new Rect (25, 103, 150, 20), RoboBrakes_GearDisplay);
-			GUI.Box (new Rect (35, 128, 70, 20), RoboBrakes_WarningDisplay);
-			GUI.Box (new Rect (110, 128, 25, 20), RBSettings_BKDisplay);
-			GUI.Box (new Rect (140, 128, 25, 20), RBSettings_TZDisplay);
+			GUI.Box (new Rect (5, 128, 60, 20), RBSettings_DPDisplay);
+			GUI.Box (new Rect (70, 128, 60, 20), RBSettings_BKDisplay);
+			GUI.Box (new Rect (135, 128, 60, 20), RBSettings_TZDisplay);
 			GUI.Label (new Rect (5, 148, 190, 10), "<color=#222222>__________________________________</color>");
 			//---------------------------------------------------------------------------------------------------------------------
 			//Show or Hide Settings
 			GUI.skin.button.fontSize = 11;
-			if (ShowSettings == false) {
-				GUIContent Settings = new GUIContent ("<b><color=#777777>▼ Settings ▼</color></b>");
+			if (ShowSettingsGUI == false) {
+				GUIContent Settings = new GUIContent ("<b><color=#777777>Settings</color></b>");
 				if (GUI.Button (new Rect (50, 155, 100, 20), Settings) == true) {
-					ShowSettings = true;
-					//This determines the size of the settings window
-					GUI_WindowHeight = 280;
-					RoboBrakes_GUIOn.Set (GUI_WindowLeft, GUI_WindowTop, GUI_WindowWidth, GUI_WindowHeight); //set window position
+					ShowSettingsGUI = true;
 				}
-			} 
-			//---------------------------------------------------------------------------------------------------------------------
-			//This shows the settings area which expands below the normal GUI window
-			if (ShowSettings == true) {
-				GUIContent Settings = new GUIContent ("<b><color=white>▲ Settings ▲</color></b>");
+			}
+			if (ShowSettingsGUI == true) {
+				GUIContent Settings = new GUIContent ("<b><color=white>Settings</color></b>");
 				if (GUI.Button (new Rect (50, 155, 100, 20), Settings) == true) {
-					ShowSettings = false;
-					//This is the original window size without showing settings
-					GUI_WindowHeight = 180;
-					RoboBrakes_GUIOn.Set (GUI_WindowLeft, GUI_WindowTop, GUI_WindowWidth, GUI_WindowHeight); //set window position
-				}
-				GUI.skin.label.alignment = TextAnchor.MiddleLeft;
-				GUI.skin.label.fontSize = 11;
-				//Deactivation Speed Slider & Enable/Disable Parking Brake
-				if (DeactivateSpeed < 1) {
-					GUI.Label (new Rect (15, 180, 170, 17), "Deactivation Speed: Full Stop");
-					//RoboBrakes_ENABLEPARKINGBRAKE = true;
-				} else {
-					GUI.Label (new Rect (15, 180, 170, 17), "Deactivation Speed: " + DeactivateSpeed + " m/s");
-					//RoboBrakes_ENABLEPARKINGBRAKE = false;
-				}
-				DeactivateSpeed = GUI.HorizontalSlider (new Rect (15, 195, 170, 10), Mathf.Floor (DeactivateSpeed), 0.25f, 25f);
-				//Activation Delay Time Slider
-				if (ActivationDelay == 0.0) {
-					GUI.Label (new Rect (15, 207, 170, 17), "Activation Delay: Instant");
-				} else {
-					GUI.Label (new Rect (15, 207, 170, 17), "Activation Delay: " + ActivationDelay + " s");
-				}
-				ActivationDelay = GUI.HorizontalSlider (new Rect (15, 222, 170, 10), ((Mathf.Round (ActivationDelay * 10)) / 10), 0.0f, 5.0f);
-				//---------------------------------------------------------------------------------------------------------------------
-				//"B" Key Settings - Each press of the button toggles between Off, Press, Toggle
-				GUI.Label (new Rect (20, 237, 80, 17), "'B' Key Mode: ");
-				//B Key Off
-				if (RBSettings_BKeyOff) {
-					GUIContent BSetting = new GUIContent ("<b><color=white>Off</color></b>");
-					if (GUI.Button (new Rect (100, 237, 65, 17), BSetting) == true) {
-						RBSettings_BKeyOff = false;
-						RBSettings_BKeyPress = true;
-						RBSettings_BKeyToggle = false;
-					}
-					RBSettings_BKDisplay = "<b><color=#777777>'B'</color></b>";
-					//Turn Brakes Off if they are engaged when modes are switched
-					RoboBrakes_BRAKEOVERIDE = false;
-				}
-				//B Key Press/Hold
-				if (RBSettings_BKeyPress) {
-					GUIContent BSetting = new GUIContent ("<b><color=white>Hold</color></b>");
-					if (GUI.Button (new Rect (100, 237, 65, 17), BSetting) == true) {
-						RBSettings_BKeyOff = false;
-						RBSettings_BKeyPress = false;
-						RBSettings_BKeyToggle = true;
-					}
-					RBSettings_BKDisplay = "<b><color=#33CC33>'B'</color></b>";
-				}
-				//B Key Toggle
-				if (RBSettings_BKeyToggle) {
-					GUIContent BSetting = new GUIContent ("<b><color=white>Toggle</color></b>");
-					if (GUI.Button (new Rect (100, 237, 65, 17), BSetting) == true) {
-						RBSettings_BKeyOff = true;
-						RBSettings_BKeyPress = false;
-						RBSettings_BKeyToggle = false;
-					}
-					RBSettings_BKDisplay = "<b><color=#33CC33>'B'</color></b>";
-				}
-				//---------------------------------------------------------------------------------------------------------------------
-				//Throttle Zeroing Setting - Each press of the button toggles between On & Off
-				GUI.Label (new Rect (20, 258, 120, 17), "Throttle Zeroing: ");
-				//Throttle Zeroing On
-				if (RBSettings_ThrottleZeroing == true) {
-					GUIContent ThrottleZSetting = new GUIContent ("<b><color=white>On</color></b>");
-					if (GUI.Button (new Rect (125, 258, 45, 17), ThrottleZSetting) == true) {
-						RBSettings_ThrottleZeroing = false;
-					}
-					RBSettings_TZDisplay = "<b><color=#33CC33>TZ</color></b>";
-				}
-				//Throttle Zeroing Off
-				if (RBSettings_ThrottleZeroing == false) {
-					GUIContent ThrottleZSetting = new GUIContent ("<b><color=white>Off</color></b>");
-					if (GUI.Button (new Rect (125, 258, 45, 17), ThrottleZSetting) == true) {
-						RBSettings_ThrottleZeroing = true;
-					}
-					RBSettings_TZDisplay = "<b><color=#777777>TZ</color></b>";
+					ShowSettingsGUI = false;
 				}
 			}
 			//This allows the GUI to be moved... This MUST be last!
+			if (RoboBrakes_MainGUI.position.x != MainGUI_WindowLeft)
+				MainGUI_WindowLeft = RoboBrakes_MainGUI.position.x;
+			if (RoboBrakes_MainGUI.position.y != MainGUI_WindowTop)
+				MainGUI_WindowTop = RoboBrakes_MainGUI.position.y;
+			GUI.DragWindow (new Rect (0, 0, 400, 17));
+		}
+
+		//Settings GUI
+		//============================================================================================================================================
+		private void SettingsGUI (int WindowID)
+		{
+			GUI.skin.label.alignment = TextAnchor.MiddleLeft;
+			GUI.skin.label.fontSize = 11;
+			//Deactivation Speed Slider
+			//---------------------------------------------------------------------------------------------------------------------
+			if (DeactivationSpeed < 1) {
+				GUI.Label (new Rect (25, 20, 170, 17), "Deactivation Speed: Full Stop");
+			} else {
+				GUI.Label (new Rect (25, 20, 170, 17), "Deactivation Speed: " + DeactivationSpeed + " m/s");
+			}
+			DeactivationSpeed = GUI.HorizontalSlider (new Rect (25, 35, 170, 10), Mathf.Floor (DeactivationSpeed), 0.25f, 25f);
+			//Activation Delay Time Slider
+			//---------------------------------------------------------------------------------------------------------------------
+			if (ActivationDelay == 0.0) {
+				GUI.Label (new Rect (25, 47, 170, 17), "Activation Delay: Instant");
+			} else {
+				GUI.Label (new Rect (25, 47, 170, 17), "Activation Delay: " + ActivationDelay + " s");
+			}
+			ActivationDelay = GUI.HorizontalSlider (new Rect (25, 62, 170, 10), ((Mathf.Round (ActivationDelay * 10)) / 10), 0.0f, 5.0f);
+
+			//Brake Override Settings - Each press of the button toggles between Off, Press, Toggle
+			//---------------------------------------------------------------------------------------------------------------------
+			GUI.Label (new Rect (5, 77, 100, 17), "Brake Override: ");
+			//B Key Off
+			if (RBSettings_BKeyOff) {
+				GUIContent BSetting = new GUIContent ("<b><color=grey>Off</color></b>");
+				if (GUI.Button (new Rect (115, 77, 65, 17), BSetting) == true) {
+					RBSettings_BKeyOff = false;
+					RBSettings_BKeyPress = true;
+					RBSettings_BKeyToggle = false;
+				}
+				//Turn Brakes Off if they are engaged when modes are switched
+				RoboBrakes_BRAKEOVERRIDE = false;
+			}
+			//B Key Press/Hold
+			if (RBSettings_BKeyPress) {
+				GUIContent BSetting = new GUIContent ("<b><color=white>Hold</color></b>");
+				if (GUI.Button (new Rect (115, 77, 65, 17), BSetting) == true) {
+					RBSettings_BKeyOff = false;
+					RBSettings_BKeyPress = false;
+					RBSettings_BKeyToggle = true;
+				}
+			}
+			//B Key Toggle
+			if (RBSettings_BKeyToggle) {
+				GUIContent BSetting = new GUIContent ("<b><color=white>Toggle</color></b>");
+				if (GUI.Button (new Rect (115, 77, 65, 17), BSetting) == true) {
+					RBSettings_BKeyOff = true;
+					RBSettings_BKeyPress = false;
+					RBSettings_BKeyToggle = false;
+				}
+			}
+
+			//Throttle Zeroing Setting - Each press of the button toggles between On & Off
+			//---------------------------------------------------------------------------------------------------------------------
+			GUI.Label (new Rect (5, 98, 120, 17), "Throttle Zeroing: ");
+			//Throttle Zeroing On
+			if (RBSettings_ThrottleZeroing == true) {
+				GUIContent ThrottleZSetting = new GUIContent ("<b><color=white>On</color></b>");
+				if (GUI.Button (new Rect (125, 98, 45, 17), ThrottleZSetting) == true) {
+					RBSettings_ThrottleZeroing = false;
+				}
+			}
+			//Throttle Zeroing Off
+			if (RBSettings_ThrottleZeroing == false) {
+				GUIContent ThrottleZSetting = new GUIContent ("<b><color=grey>Off</color></b>");
+				if (GUI.Button (new Rect (125, 98, 45, 17), ThrottleZSetting) == true) {
+					RBSettings_ThrottleZeroing = true;
+				}
+			}
+	
+			//Selection Grid
+			//---------------------------------------------------------------------------------------------------------------------
+			SelectionGridX = 10;
+			SelectionGridY = 160;
+			GUI.Label (new Rect (SelectionGridX, SelectionGridY, 200, 10), "<color=#222222>__________________________________</color>");
+			GUI.Label (new Rect (SelectionGridX+5, SelectionGridY+20, 70, 17), "Automatic:");
+			GUI.Label (new Rect (SelectionGridX+10, SelectionGridY+40, 70, 17), "Override:");
+			GUI.Label (new Rect (SelectionGridX+75, SelectionGridY+5, 40, 17), "Gear");
+			if (GUI.Toggle (new Rect (SelectionGridX+82, SelectionGridY+18, 17, 17), RoboBrakes_AUTOGEAR,"") != RoboBrakes_AUTOGEAR) RoboBrakes_AUTOGEAR = !RoboBrakes_AUTOGEAR;
+			if (GUI.Toggle (new Rect (SelectionGridX+82, SelectionGridY+38, 17, 17), RoboBrakes_OVERRIDEGEAR,"") != RoboBrakes_OVERRIDEGEAR) RoboBrakes_OVERRIDEGEAR = !RoboBrakes_OVERRIDEGEAR;
+			GUI.Label (new Rect (SelectionGridX+118, SelectionGridY+5, 40, 17), "Aero");
+			if (GUI.Toggle (new Rect (SelectionGridX+123, SelectionGridY+18, 17, 17), RoboBrakes_AUTOAERO,"") != RoboBrakes_AUTOAERO) RoboBrakes_AUTOAERO = !RoboBrakes_AUTOAERO;
+			if (GUI.Toggle (new Rect (SelectionGridX+123, SelectionGridY+38, 17, 17), RoboBrakes_OVERRIDEAERO,"") != RoboBrakes_OVERRIDEAERO) RoboBrakes_OVERRIDEAERO = !RoboBrakes_OVERRIDEAERO;
+			GUI.Label (new Rect (SelectionGridX+155, SelectionGridY+5, 40, 17), "Chute");
+			if (GUI.Toggle (new Rect (SelectionGridX+165, SelectionGridY+18, 17, 17), RoboBrakes_AUTOCHUTE,"") != RoboBrakes_AUTOCHUTE) RoboBrakes_AUTOCHUTE = !RoboBrakes_AUTOCHUTE;
+			if (GUI.Toggle (new Rect (SelectionGridX+165, SelectionGridY+38, 17, 17), RoboBrakes_OVERRIDECHUTE, "") != RoboBrakes_OVERRIDECHUTE) RoboBrakes_OVERRIDECHUTE = !RoboBrakes_OVERRIDECHUTE;
+
+			//This allows the GUI to be moved... This MUST be last!
+			if (RoboBrakes_SettingsGUI.position.x != SettingsGUI_WindowLeft)
+				SettingsGUI_WindowLeft = RoboBrakes_SettingsGUI.position.x;
+			if (RoboBrakes_SettingsGUI.position.y != SettingsGUI_WindowTop)
+				SettingsGUI_WindowTop = RoboBrakes_SettingsGUI.position.y;
 			GUI.DragWindow (new Rect (0, 0, 400, 17));
 		}
 			
-		//Main Actions
+		//Triggers and Actions for Activating RoboBrakes
 		//============================================================================================================================================
 
 		//This is a trigger to run actions ONE TIME upon Landing...
@@ -409,30 +491,35 @@ namespace RoboBrakes
 		{
 			print ("ROBOBRAKES - Brakes are Ready for Activation " + TimerTime2 + "s after landing!");
 			RoboBrakes_READYFORACTIVATION = true;
+			RoboBrakes_CHUTEREADY = true;
 			//Set Throttle to Zero when the Timer completes, if that option is enabled
 			if (RBSettings_ThrottleZeroing == true) {
 				FlightInputHandler.state.mainThrottle = 0;
 			}
 		}
 
+		private void DeactivationTrigger ()
+		{
+			RoboBrakes_CUTCHUTE = true;
+		}
+
 		//This method runs every physics frame
 		//============================================================================================================================================
 		private void FixedUpdate ()
 		{
-			
 			//This allows the brakes to be over-riden.  This is determined by the 'B Key Setting'.
 			//This is if B-Key is in 'Hold' Mode
 			if (RBSettings_BKeyPress == true) {
 				if (Input.GetKey (KeyCode.B)) {
-					RoboBrakes_BRAKEOVERIDE = true;
+					RoboBrakes_BRAKEOVERRIDE = true;
 				} else {
-					RoboBrakes_BRAKEOVERIDE = false;
+					RoboBrakes_BRAKEOVERRIDE = false;
 				}
 			}
 			//This is if B-Key is in 'Toggle' Mode
 			if (RBSettings_BKeyToggle == true) {
 				if (Input.GetKeyDown (KeyCode.B)) {
-					RoboBrakes_BRAKEOVERIDE = !RoboBrakes_BRAKEOVERIDE;
+					RoboBrakes_BRAKEOVERRIDE = !RoboBrakes_BRAKEOVERRIDE;
 				}
 			}
 
@@ -485,6 +572,10 @@ namespace RoboBrakes
 				print ("ROBOBRAKES - Count Complete! Number of RoboBrakable parts is " + CapablePartList.Count ());
 			}
 
+			if ((IsLanded == true) && (RoboBrakes_ARMED == true) && (RoboBrakes_ACTIVE == true) && (GroundSpeed < DeactivationSpeed)) {
+				DeactivationTrigger ();
+			}
+
 			//Robo Brake Logic
 			//============================================================================================================================================
 			//Parameters for activating the brakes
@@ -496,11 +587,11 @@ namespace RoboBrakes
 			}
 
 			//Well this is a mess... But it works
-			//Check all of this if were not manually overiding the brakes
-			if (RoboBrakes_BRAKEOVERIDE == false) {
+			if (RoboBrakes_BRAKEOVERRIDE == false) {
+				//Check all of this if were not manually overiding the brakes
 				if (IsLanded == true) {
 					if (RoboBrakes_HASPARTENABLED == true) {
-						if (GroundSpeed > DeactivateSpeed) {
+						if (GroundSpeed > DeactivationSpeed) {
 							if (RoboBrakes_ARMED == true && RoboBrakes_READYFORACTIVATION == true) {
 								RoboBrakes_ACTIVE = true;
 							} else {
@@ -517,7 +608,7 @@ namespace RoboBrakes
 					RoboBrakes_ACTIVE = false;
 					LandedNow = false;
 				}
-			//Brake Overide bypass
+				//Brake OVERRIDE bypass
 			} else {
 				RoboBrakes_ACTIVE = true;
 			}
@@ -538,11 +629,7 @@ namespace RoboBrakes
 							//Create new Instance of ModuleLandingGear to reference
 							ModuleLandingGear MLG = new ModuleLandingGear ();
 							MLG = SinglePart.FindModuleImplementing<ModuleLandingGear> ();
-							//Check to see if the gear is down or not 
-							if (MLG.gearState == ModuleLandingGear.GearStates.DEPLOYED) {
-								RoboBrakes_GearWarningCount++;
-							}
-							//Increase count by 1 of enabled parts for GUI display and warnings
+							//Increase count by 1 of enabled parts for GUI display
 							RoboBrakes_GearEnabledCount++;
 							//Create a list of actions that are available to this particular part & it's modules
 							BaseActionList BAL = new BaseActionList (SinglePart, MLG); 
@@ -553,7 +640,7 @@ namespace RoboBrakes
 									//Engage brakes (or other action) when triggered
 									if (RoboBrakes_ACTIVE == true) {
 										//Add to list of parts to print
-										ActiveBrakingPartNameList.Add (SinglePart.name);
+										
 										//Create Action Parameter for enabling brakes (or other action) - I don't full understand this, but it is needed to activate the action
 										KSPActionParam AP = new KSPActionParam (KSPActionGroup.None, KSPActionType.Activate);
 										//Perform said action
@@ -572,15 +659,12 @@ namespace RoboBrakes
 						if (SinglePart.Modules.Contains ("ModuleAdvancedLandingGear")) {
 							ModuleAdvancedLandingGear MALG = new ModuleAdvancedLandingGear ();
 							MALG = SinglePart.FindModuleImplementing<ModuleAdvancedLandingGear> ();
-							if (MALG.gearState == ModuleAdvancedLandingGear.GearStates.DEPLOYED) {
-								RoboBrakes_GearWarningCount++;
-							}
 							RoboBrakes_GearEnabledCount++;
 							BaseActionList BAL = new BaseActionList (SinglePart, MALG); 
 							foreach (BaseAction BA in BAL) { 
 								if (BA.guiName == "Brakes") {
 									if (RoboBrakes_ACTIVE == true) {
-										ActiveBrakingPartNameList.Add (SinglePart.name);
+										
 										KSPActionParam AP = new KSPActionParam (KSPActionGroup.None, KSPActionType.Activate); 
 										BA.Invoke (AP); 
 									} else {
@@ -595,14 +679,13 @@ namespace RoboBrakes
 						if (SinglePart.Modules.Contains ("ModuleLandingGearFixed")) {
 							ModuleLandingGearFixed MLGF = new ModuleLandingGearFixed ();
 							MLGF = SinglePart.FindModuleImplementing<ModuleLandingGearFixed> ();
-							//These Gear are always down, no need to trigger a 'Gear Not Down' warning...
-							RoboBrakes_GearWarningCount++;
+							//These Gear are always down
 							RoboBrakes_GearEnabledCount++;
 							BaseActionList BAL = new BaseActionList (SinglePart, MLGF); 
 							foreach (BaseAction BA in BAL) { 
 								if (BA.guiName == "Brakes") {
 									if (RoboBrakes_ACTIVE == true) {
-										ActiveBrakingPartNameList.Add (SinglePart.name);
+										
 										KSPActionParam AP = new KSPActionParam (KSPActionGroup.None, KSPActionType.Activate); 
 										BA.Invoke (AP); 
 									} else {
@@ -624,7 +707,7 @@ namespace RoboBrakes
 								foreach (BaseAction BA in BAL) { 
 									if (RoboBrakes_ACTIVE == true) {
 										if (BA.guiName == "Extend") {
-											ActiveBrakingPartNameList.Add (SinglePart.name);
+											
 											KSPActionParam AP = new KSPActionParam (KSPActionGroup.None, KSPActionType.Activate); 
 											BA.Invoke (AP); 
 										}
@@ -646,7 +729,7 @@ namespace RoboBrakes
 								foreach (BaseAction BA in BAL) { 
 									if (RoboBrakes_ACTIVE == true) {
 										if (BA.guiName == "Extend") {
-											ActiveBrakingPartNameList.Add (SinglePart.name);
+											
 											KSPActionParam AP = new KSPActionParam (KSPActionGroup.None, KSPActionType.Activate); 
 											BA.Invoke (AP); 
 										}
@@ -659,13 +742,38 @@ namespace RoboBrakes
 								}
 							}
 							//---------------------------------------------------------------------------------------------------------------------
+							//Module Parachutes
+							if (SinglePart.Modules.Contains ("ModuleParachute")) {
+								ModuleParachute MPA = new ModuleParachute ();
+								MPA = SinglePart.FindModuleImplementing<ModuleParachute> ();
+								RoboBrakes_ParaEnabledCount++;
+								BaseActionList BAL = new BaseActionList (SinglePart, MPA); 
+								foreach (BaseAction BA in BAL) { 
+									if (RoboBrakes_ACTIVE == true) {
+										if (RoboBrakes_CHUTEREADY == true) {
+											RoboBrakes_CHUTEREADY = false;
+											
+											MPA.Deploy ();
+										}
+									}
+									if (MPA.deploymentState.Equals (ModuleParachute.deploymentStates.DEPLOYED)) {
+										if (RoboBrakes_CUTCHUTE == true) {
+											RoboBrakes_CUTCHUTE = false;
+											MPA.CutParachute ();
+											MPA.Repack ();
+											print ("ROBOBRAKES - Chute " + SinglePart.name + " Cut & Repacked Automatically!");
+										}
+									}
+								}
+							}
+							//---------------------------------------------------------------------------------------------------------------------
 						}
 					}
 				}
 				//Updating the GUI
 				//============================================================================================================================================
 				//Update Active Status if we are currently braking
-				if (TimerTime2Done == true | RoboBrakes_BRAKEOVERIDE == true) {
+				if (TimerTime2Done == true | RoboBrakes_BRAKEOVERRIDE == true) {
 					if (RoboBrakes_ACTIVE == true) {
 						ActiveDisplay = "<b><color=#33CC33>Active</color></b>";
 					} else {
@@ -675,30 +783,23 @@ namespace RoboBrakes
 					ActiveDisplay = "<b><color=#E6E600>Active</color></b>";
 				}
 
+				//Update Gear Display Counter
+				RoboBrakes_GearDisplay = ("Enabled Gear: " + RoboBrakes_GearEnabledCount.ToString ());
+
 				//Warn if Aero Modules are active and we are not in an Atmosphere
 				if (FlightGlobals.ActiveVessel.atmDensity > 0) {
-					RoboBrakes_AeroDisplay = ("Enabled Aero: " + RoboBrakes_AeroEnabledCount.ToString ());
+					//if Parachutes are enabled add to Aero Counter Display
+					if (RoboBrakes_ParaEnabledCount != 0) {
+						RoboBrakes_AeroDisplay = ("Enabled Aero: " + RoboBrakes_AeroEnabledCount.ToString () + " + " + RoboBrakes_ParaEnabledCount.ToString ());
+					} else {
+						RoboBrakes_AeroDisplay = ("Enabled Aero: " + RoboBrakes_AeroEnabledCount.ToString ());
+					}
 				} else {
 					RoboBrakes_AeroDisplay = ("No Atmosphere!");
 				}
 
-				//Warn if Gear is not down on enabled modules and RoboBrakes are currently ARMED
-				if (RoboBrakes_GearEnabledCount != RoboBrakes_GearWarningCount && RoboBrakes_ARMED == true) {
-					RoboBrakes_WARNING = true;
-					RoboBrakes_GearDisplay = ("<b>Gear Not Down!</b>");
-					if (BlinkText) {
-						RoboBrakes_WarningDisplay = ("<b><color=#666666>ALARM!</color></b>");
-					} else {
-						RoboBrakes_WarningDisplay = ("<b><color=red>ALARM!</color></b>");
-					}
-				} else {
-					RoboBrakes_WARNING = false;
-					RoboBrakes_GearDisplay = ("Enabled Gear: " + RoboBrakes_GearEnabledCount.ToString ());
-					RoboBrakes_WarningDisplay = ("<b><color=#666666>ALARM!</color></b>");
-				}
-
 				//Does this Vessel have at least one Enabled Part?
-				if (RoboBrakes_GearEnabledCount == 0 && RoboBrakes_AeroEnabledCount == 0) {
+				if (RoboBrakes_GearEnabledCount == 0 && RoboBrakes_AeroEnabledCount == 0 && RoboBrakes_ParaEnabledCount == 0) {
 					RoboBrakes_HASPARTENABLED = false;
 					RoboBrakes_ARMED = false;
 					RoboBrakes_ACTIVE = false;
@@ -707,26 +808,93 @@ namespace RoboBrakes
 				} else {
 					RoboBrakes_HASPARTENABLED = true;
 				}
+
+				//Parachute Display
+				//if (RBSettings_DeployParachutes == true) {
+				//	RBSettings_DPDisplay = "<b><color=#33CC33>Chute</color></b>";
+				//} else {
+					RBSettings_DPDisplay = "<b><color=#777777>Chute</color></b>";
+				//}
+
+				//Throttle Zero Display
+				if (RBSettings_ThrottleZeroing == true) {
+					RBSettings_TZDisplay = "<b><color=#33CC33>Throttle-0</color></b>";
+				} else {
+					RBSettings_TZDisplay = "<b><color=#777777>Throttle-0</color></b>";
+				}
+
+				//Brake Override Display
+				if (RBSettings_BKeyOff == true){
+					RBSettings_BKDisplay = "<b><color=#777777>Override</color></b>";
+				}
+				if (RBSettings_BKeyPress == true) {
+					RBSettings_BKDisplay = "<b><color=#33CC33>Override</color></b>";
+				}
+				if (RBSettings_BKeyToggle == true) {
+					RBSettings_BKDisplay = "<b><color=#33CC33>Override</color></b>";
+				}
 			}
+
+			//Default Displays if no Parts are available
+			if ((CapablePartList.Count ()) == 0) {
+				RoboBrakes_HASPARTENABLED = false;
+				RoboBrakes_ARMED = false;
+				RoboBrakes_ACTIVE = false;
+				ActiveDisplay = "<b><color=#777777>Active</color></b>";
+				RoboBrakes_AeroDisplay = ("Aero: No Capable Parts");
+				RoboBrakes_GearDisplay = ("Gear: No Capable Parts");
+				RBSettings_BKDisplay = "<b><color=#777777>'B'</color></b>";
+				RBSettings_TZDisplay = "<b><color=#777777>TZ</color></b>";
+			}
+
 			//Reset Counters - These must be after everything else
-			RoboBrakes_GearWarningCount = 0;
 			RoboBrakes_AeroEnabledCount = 0;
 			RoboBrakes_GearEnabledCount = 0;
+			RoboBrakes_ParaEnabledCount = 0;
 			//Update the Toolbar Button depending on the current state of mod
 			UpdateToolbarButton ();
 		}
-			
+
+		//============================================================================================================================================
 		//Called when the game is leaving the scene or exiting. Perform any clean up work here...
 		internal void OnDestroy ()
 		{
+			SaveSettings ();
 			RenderingManager.RemoveFromPostDrawQueue (0, OnDraw);
 			GameEvents.onGUIApplicationLauncherReady.Remove (OnGUIApplicationLauncherReady);
-			Timer100.Dispose();
+			Timer100.Dispose ();
 			//Remove Toolbar Button
 			if (RoboBrakes_ToolbarButton != null) {
 				ApplicationLauncher.Instance.RemoveModApplication (RoboBrakes_ToolbarButton);
 			}
 			print ("ROBOBRAKES - Bye bye...");
+		}
+		//============================================================================================================================================
+		//Called when OnDestroy runs or manually if triggered
+		public void SaveSettings ()
+		{
+			RoboBrakes_SystemSettings = new ConfigNode ();
+			RoboBrakes_SystemSettings.AddValue ("MainGUI_WindowTop", MainGUI_WindowTop);
+			RoboBrakes_SystemSettings.AddValue ("MainGUI_WindowLeft", MainGUI_WindowLeft);
+			RoboBrakes_SystemSettings.AddValue ("SettingsGUI_WindowTop", SettingsGUI_WindowTop);
+			RoboBrakes_SystemSettings.AddValue ("SettingsGUI_WindowLeft", SettingsGUI_WindowLeft);
+			//--------------------------------------------------------------------------------------------------
+			RoboBrakes_SystemSettings.AddValue ("DeactivationSpeed", DeactivationSpeed);
+			RoboBrakes_SystemSettings.AddValue ("ActivationDelay", ActivationDelay);
+			RoboBrakes_SystemSettings.AddValue ("RBSettings_BKeyPress", RBSettings_BKeyPress);
+			RoboBrakes_SystemSettings.AddValue ("RBSettings_BKeyToggle", RBSettings_BKeyToggle);
+			RoboBrakes_SystemSettings.AddValue ("RBSettings_BKeyOff", RBSettings_BKeyOff);
+			RoboBrakes_SystemSettings.AddValue ("RBSettings_ThrottleZeroing", RBSettings_ThrottleZeroing);
+			//--------------------------------------------------------------------------------------------------
+			RoboBrakes_SystemSettings.AddValue ("RoboBrakes_AUTOGEAR", RoboBrakes_AUTOGEAR);
+			RoboBrakes_SystemSettings.AddValue ("RoboBrakes_AUTOAERO", RoboBrakes_AUTOAERO);
+			RoboBrakes_SystemSettings.AddValue ("RoboBrakes_AUTOCHUTE", RoboBrakes_AUTOCHUTE);
+			RoboBrakes_SystemSettings.AddValue ("RoboBrakes_OVERRIDEGEAR", RoboBrakes_OVERRIDEGEAR);
+			RoboBrakes_SystemSettings.AddValue ("RoboBrakes_OVERRIDEAERO", RoboBrakes_OVERRIDEAERO);
+			RoboBrakes_SystemSettings.AddValue ("RoboBrakes_OVERRIDECHUTE", RoboBrakes_OVERRIDECHUTE);
+			//--------------------------------------------------------------------------------------------------
+			RoboBrakes_SystemSettings.Save ("GameData/RoboBrakes/Config/RoboBrakes_PluginSettings.cfg", "These are the default settings unless changed by the user...");
+			print ("ROBOBRAKES - Settings Saved!");
 		}
 	}
 }
