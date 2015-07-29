@@ -41,23 +41,7 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
-RoboBrakes/bin/Debug/Mono.Cecil.dll
-RoboBrakes/bin/Debug/Mono.Security.dll
-RoboBrakes/bin/Debug/normidna.nlp
-RoboBrakes/bin/Debug/mscorlib.dll
-RoboBrakes/bin/Debug/normnfd.nlp
-RoboBrakes/bin/Debug/normnfkc.nlp
-RoboBrakes/bin/Debug/normnfkd.nlp
-RoboBrakes/bin/Debug/Assembly-CSharp.dll
-RoboBrakes/bin/Debug/normnfc.nlp
-RoboBrakes/bin/Debug/TDx.TDxInput.dll
-RoboBrakes/bin/Debug/UnityEngine.dll
-RoboBrakes/bin/Debug/TrackIRUnity.dll
-RoboBrakes/bin/Debug/AutoBrakes.dll
-RoboBrakes/bin/Debug/Assembly-CSharp-firstpass.dll
-RoboBrakes/obj/Debug/RoboBrakes.csproj.FileListAbsolute.txt
-RoboBrakes/obj/Debug/RoboBrakes.dll
-RoboBrakes/obj/Debug/RoboBrakes.pdb
+RoboBrakes/bin
+RoboBrakes/obj
 RoboBrakes.userprefs
-RoboBrakes/obj/Debug/RoboBrakes.csprojResolveAssemblyReference.cache
-RoboBrakes/bin/Debug/AutoBrakes.pdb
+
