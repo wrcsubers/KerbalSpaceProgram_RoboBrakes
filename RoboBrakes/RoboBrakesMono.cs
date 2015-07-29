@@ -69,7 +69,6 @@ namespace RoboBrakes
 		private string RoboBrakes_AeroDisplay;
 
 		private string ArmedDisplay = "<b><color=#666666>Armed</color></b>";
-		private string RBSettings_DPDisplay = "<b><color=#33CC33>Chute</color></b>";
 		private string RBSettings_TZDisplay = "<b><color=#33CC33>Throttle 0</color></b>";
 		private string RBSettings_BKDisplay = "<b><color=#33CC33>Override</color></b>";
 
@@ -87,7 +86,7 @@ namespace RoboBrakes
 		private float SettingsGUI_WindowTop = 190;
 		private float SettingsGUI_WindowLeft = ((Screen.width / 2) + 150);
 		private float SettingsGUI_WindowWidth = 220;
-		private float SettingsGUI_WindowHeight = 220;
+		private float SettingsGUI_WindowHeight = 240;
 		private float SelectionGridX;
 		private float SelectionGridY;
 
@@ -277,7 +276,7 @@ namespace RoboBrakes
 		//============================================================================================================================================
 		//This sets up the MainGUI Window and lays out the entire GUI
 		private void MainGUI (int WindowID)
-		{   
+		{
 			GUI.skin.button.richText = true;
 			GUI.skin.button.fontSize = 14;
 			GUI.skin.box.fontSize = 16;
@@ -316,9 +315,8 @@ namespace RoboBrakes
 			GUI.skin.box.fontSize = 12;
 			GUI.Box (new Rect (25, 80, 150, 20), RoboBrakes_AeroDisplay);
 			GUI.Box (new Rect (25, 103, 150, 20), RoboBrakes_GearDisplay);
-			GUI.Box (new Rect (5, 128, 60, 20), RBSettings_DPDisplay);
-			GUI.Box (new Rect (70, 128, 60, 20), RBSettings_BKDisplay);
-			GUI.Box (new Rect (135, 128, 60, 20), RBSettings_TZDisplay);
+			GUI.Box (new Rect (20, 128, 75, 20), RBSettings_BKDisplay);
+			GUI.Box (new Rect (105, 128, 75, 20), RBSettings_TZDisplay);
 			GUI.Label (new Rect (5, 148, 190, 10), "<color=#222222>__________________________________</color>");
 			//---------------------------------------------------------------------------------------------------------------------
 			//Show or Hide Settings
@@ -368,11 +366,11 @@ namespace RoboBrakes
 
 			//Brake Override Settings - Each press of the button toggles between Off, Press, Toggle
 			//---------------------------------------------------------------------------------------------------------------------
-			GUI.Label (new Rect (5, 77, 100, 17), "Brake Override: ");
+			GUI.Label (new Rect (25, 77, 100, 17), "Brake Override: ");
 			//B Key Off
 			if (RBSettings_BKeyOff) {
 				GUIContent BSetting = new GUIContent ("<b><color=grey>Off</color></b>");
-				if (GUI.Button (new Rect (115, 77, 65, 17), BSetting) == true) {
+				if (GUI.Button (new Rect (130, 77, 65, 17), BSetting) == true) {
 					RBSettings_BKeyOff = false;
 					RBSettings_BKeyPress = true;
 					RBSettings_BKeyToggle = false;
@@ -383,7 +381,7 @@ namespace RoboBrakes
 			//B Key Press/Hold
 			if (RBSettings_BKeyPress) {
 				GUIContent BSetting = new GUIContent ("<b><color=white>Hold</color></b>");
-				if (GUI.Button (new Rect (115, 77, 65, 17), BSetting) == true) {
+				if (GUI.Button (new Rect (130, 77, 65, 17), BSetting) == true) {
 					RBSettings_BKeyOff = false;
 					RBSettings_BKeyPress = false;
 					RBSettings_BKeyToggle = true;
@@ -392,7 +390,7 @@ namespace RoboBrakes
 			//B Key Toggle
 			if (RBSettings_BKeyToggle) {
 				GUIContent BSetting = new GUIContent ("<b><color=white>Toggle</color></b>");
-				if (GUI.Button (new Rect (115, 77, 65, 17), BSetting) == true) {
+				if (GUI.Button (new Rect (130, 77, 65, 17), BSetting) == true) {
 					RBSettings_BKeyOff = true;
 					RBSettings_BKeyPress = false;
 					RBSettings_BKeyToggle = false;
@@ -401,18 +399,18 @@ namespace RoboBrakes
 
 			//Throttle Zeroing Setting - Each press of the button toggles between On & Off
 			//---------------------------------------------------------------------------------------------------------------------
-			GUI.Label (new Rect (5, 98, 120, 17), "Throttle Zeroing: ");
+			GUI.Label (new Rect (25, 98, 120, 17), "Throttle Zeroing: ");
 			//Throttle Zeroing On
 			if (RBSettings_ThrottleZeroing == true) {
 				GUIContent ThrottleZSetting = new GUIContent ("<b><color=white>On</color></b>");
-				if (GUI.Button (new Rect (125, 98, 45, 17), ThrottleZSetting) == true) {
+				if (GUI.Button (new Rect (130, 98, 65, 17), ThrottleZSetting) == true) {
 					RBSettings_ThrottleZeroing = false;
 				}
 			}
 			//Throttle Zeroing Off
 			if (RBSettings_ThrottleZeroing == false) {
 				GUIContent ThrottleZSetting = new GUIContent ("<b><color=grey>Off</color></b>");
-				if (GUI.Button (new Rect (125, 98, 45, 17), ThrottleZSetting) == true) {
+				if (GUI.Button (new Rect (130, 98, 65, 17), ThrottleZSetting) == true) {
 					RBSettings_ThrottleZeroing = true;
 				}
 			}
@@ -420,10 +418,10 @@ namespace RoboBrakes
 			//Selection Grid
 			//---------------------------------------------------------------------------------------------------------------------
 			SelectionGridX = 10;
-			SelectionGridY = 160;
-			GUI.Label (new Rect (SelectionGridX, SelectionGridY, 200, 10), "<color=#222222>__________________________________</color>");
+			SelectionGridY = 155;
+			GUI.Label (new Rect (SelectionGridX, SelectionGridY+2, 200, 10), "<color=#222222>__________________________________</color>");
 			GUI.Label (new Rect (SelectionGridX+5, SelectionGridY+20, 70, 17), "Automatic:");
-			GUI.Label (new Rect (SelectionGridX+10, SelectionGridY+40, 70, 17), "Override:");
+			GUI.Label (new Rect (SelectionGridX+15, SelectionGridY+40, 70, 17), "Override:");
 			GUI.Label (new Rect (SelectionGridX+75, SelectionGridY+5, 40, 17), "Gear");
 			if (GUI.Toggle (new Rect (SelectionGridX+82, SelectionGridY+18, 17, 17), RoboBrakes_AUTOGEAR,"") != RoboBrakes_AUTOGEAR) RoboBrakes_AUTOGEAR = !RoboBrakes_AUTOGEAR;
 			if (GUI.Toggle (new Rect (SelectionGridX+82, SelectionGridY+38, 17, 17), RoboBrakes_OVERRIDEGEAR,"") != RoboBrakes_OVERRIDEGEAR) RoboBrakes_OVERRIDEGEAR = !RoboBrakes_OVERRIDEGEAR;
@@ -433,8 +431,18 @@ namespace RoboBrakes
 			GUI.Label (new Rect (SelectionGridX+155, SelectionGridY+5, 40, 17), "Chute");
 			if (GUI.Toggle (new Rect (SelectionGridX+165, SelectionGridY+18, 17, 17), RoboBrakes_AUTOCHUTE,"") != RoboBrakes_AUTOCHUTE) RoboBrakes_AUTOCHUTE = !RoboBrakes_AUTOCHUTE;
 			if (GUI.Toggle (new Rect (SelectionGridX+165, SelectionGridY+38, 17, 17), RoboBrakes_OVERRIDECHUTE, "") != RoboBrakes_OVERRIDECHUTE) RoboBrakes_OVERRIDECHUTE = !RoboBrakes_OVERRIDECHUTE;
+			GUI.Label (new Rect (SelectionGridX, SelectionGridY+56, 200, 10), "<color=#222222>__________________________________</color>");
+
+			//Okay Button
+			//---------------------------------------------------------------------------------------------------------------------
+			GUIContent OkayClose = new GUIContent ("<b><color=white>Okay</color></b>");
+			if (GUI.Button (new Rect (87, 218, 46, 17), OkayClose) == true) {
+				ShowSettingsGUI = false;
+				SaveSettings ();
+			}
 
 			//This allows the GUI to be moved... This MUST be last!
+			//---------------------------------------------------------------------------------------------------------------------
 			if (RoboBrakes_SettingsGUI.position.x != SettingsGUI_WindowLeft)
 				SettingsGUI_WindowLeft = RoboBrakes_SettingsGUI.position.x;
 			if (RoboBrakes_SettingsGUI.position.y != SettingsGUI_WindowTop)
@@ -809,18 +817,11 @@ namespace RoboBrakes
 					RoboBrakes_HASPARTENABLED = true;
 				}
 
-				//Parachute Display
-				//if (RBSettings_DeployParachutes == true) {
-				//	RBSettings_DPDisplay = "<b><color=#33CC33>Chute</color></b>";
-				//} else {
-					RBSettings_DPDisplay = "<b><color=#777777>Chute</color></b>";
-				//}
-
 				//Throttle Zero Display
 				if (RBSettings_ThrottleZeroing == true) {
-					RBSettings_TZDisplay = "<b><color=#33CC33>Throttle-0</color></b>";
+					RBSettings_TZDisplay = "<b><color=#33CC33>Throttle 0</color></b>";
 				} else {
-					RBSettings_TZDisplay = "<b><color=#777777>Throttle-0</color></b>";
+					RBSettings_TZDisplay = "<b><color=#777777>Throttle 0</color></b>";
 				}
 
 				//Brake Override Display
@@ -828,7 +829,7 @@ namespace RoboBrakes
 					RBSettings_BKDisplay = "<b><color=#777777>Override</color></b>";
 				}
 				if (RBSettings_BKeyPress == true) {
-					RBSettings_BKDisplay = "<b><color=#33CC33>Override</color></b>";
+					RBSettings_BKDisplay = "<b><color=#FF9900>Override</color></b>";
 				}
 				if (RBSettings_BKeyToggle == true) {
 					RBSettings_BKDisplay = "<b><color=#33CC33>Override</color></b>";
