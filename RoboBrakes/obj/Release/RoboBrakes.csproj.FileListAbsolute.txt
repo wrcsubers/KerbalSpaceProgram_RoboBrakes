@@ -1,6 +1,0 @@
-C:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\GameData\PleiadesEngineering\Properties\AssemblyInfo.cs
-C:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\GameData\PleiadesEngineering\RoboBrakes.dll
-C:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\GameData\RoboBrakes\Properties\AssemblyInfo.cs
-C:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program\GameData\RoboBrakes\RoboBrakes.dll
-C:\Users\TheWoods\Documents\Projects\RoboBrakes\RoboBrakes\obj\Release\RoboBrakes.csprojResolveAssemblyReference.cache
-C:\Users\TheWoods\Documents\Projects\RoboBrakes\RoboBrakes\obj\Release\RoboBrakes.dll
