@@ -4,17 +4,18 @@ RoboBrakes v0.2 - Unreleased
 - Added configuration file
   - User settings are now saved globally, including Window positions.
   - Settings are Loaded/Saved at the Begining/End of each flight.
-- Moved Settings to it's own window.
-- Removed Warning for undeployed gear.
+- Moved Settings to it's own window.  This gives more room to work with in the future and is cleaner looking.
+- Removed Warning for undeployed gear(I found it somewhat annoying).
 - Added Parachute functionality.
   - Parachutes deploy with gear/aero brakes upon landing.
-  - Once Deactivation Speed is reach Parachutes are Cut automatically and then repacked.
+  - Once Deactivation Speed is reached Parachutes are Cut & Repacked Automatically.
 - Updated GUI to reflect changes.
 - Added ability in settings to select which class of part (Gear/Aero/Chute) you want to activate.
   - Automatic (Deployed with Activation Timer on Landing).
   - Override (Deployed while pressing the 'B' Key).
-- Organized Variables and functions for better readability.
-- Moved GUI Display updates to 'Update' method so they are updated before the settings window is opened
+  - You can have one or both of the selections activated.
+- Organized Code so that Variables and functions have better readability.
+- Moved GUI Display updates to 'Update' method so they are updated before the settings window is opened and more often.
 
 ===========================================================================================================
 RoboBrakes v0.1 - 07.27.15
