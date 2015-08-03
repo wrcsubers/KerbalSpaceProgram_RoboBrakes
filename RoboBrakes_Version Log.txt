@@ -1,23 +1,28 @@
 ===========================================================================================================
-RoboBrakes v0.2 - Unreleased
+RoboBrakes v0.2 - 08.03.15
 ===========================================================================================================
-> Added configuration file
+* Persistent settings!
   - User settings are now saved globally, including Window positions.
-  - Settings are Loaded/Saved at the Begining/End of each flight.
-> Moved Settings to it's own window.  This gives more room to work with in the future and is cleaner looking.
-> Removed Warning for undeployed gear(I found it somewhat annoying).
-> Added Parachute functionality.
-  - Parachutes deploy with gear/aero brakes upon landing.
+  - Settings are Loaded/Saved at the Beginning/End of each flight.
+  - Settings are NOT per ship at this time.
+* Moved 'Settings' to it's own window.  This gives more room to work with in the future and is cleaner looking.
+* Removed the Warning for undeployed gear(I found it somewhat annoying).
+* System is automatically Disarmed once the Deactivation Speed is reached.
+* Added Parachute functionality.
+  - Parachutes deploy with Gear/Aero brakes upon landing, in accordance with the Activation Delay setting.
   - Once Deactivation Speed is reached Parachutes are Cut & Repacked Automatically.
-> Updated GUI to reflect changes.
-> Added ability in settings to select which class of part (Gear/Aero/Chute) you want to activate.
+  - If Parachutes are cut manually, they are repacked at the next takeoff.
+* Updated GUI to reflect changes.
+* Added ability in settings to select which class of part (Gear/Aero/Chute) you want to activate.
   - Automatic (Deployed with Activation Timer on Landing).
   - Override (Deployed while pressing the 'B' Key).
+  - Chutes cannot be over-ridden as it presents a bit of a safety hazard ;-)
   - You can have one or both of the selections activated.
-> Organized Code so that Variables and functions have better readability.
-> Moved GUI Display updates to 'Update' method so they are updated before the settings window is opened and more often.
+* Adjusted Activation/Deactivation Logic to improve functionality.
+* Organized Code so that Variables and functions have better readability.
+* Moved GUI Display updates to 'Update' method so they are updated before the settings window is opened and more often.
 
 ===========================================================================================================
 RoboBrakes v0.1 - 07.27.15
-> RoboBrakes Initial Release!
+* RoboBrakes Initial Release!
 ===========================================================================================================
