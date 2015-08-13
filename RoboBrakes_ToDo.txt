@@ -4,6 +4,4 @@ A To-Do list of things to add/fix on RoboBrakes, in no particular order....
 
 - Add control to enable SAS reset upon landing.  This will help stabilize the craft upon touchdown.
 
-- Look into thrust reverse compatibility.
-
-- Add Disarm on Deactivate switch.
+- Look into thrust reverse compatibility. Add action group triggers

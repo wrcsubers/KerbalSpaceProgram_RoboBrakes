@@ -27,6 +27,14 @@
       <HintPath>..\..\..\..\..\..\Program Files %28x86%29\Steam\steamapps\common\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="FerramAerospaceResearch">
+      <HintPath>..\..\..\..\..\..\Program Files %28x86%29\Steam\steamapps\common\Kerbal Space Program\GameData\FerramAerospaceResearch\Plugins\FerramAerospaceResearch.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Scale_Redist">
+      <HintPath>..\..\..\..\..\..\Program Files %28x86%29\Steam\steamapps\common\Kerbal Space Program\GameData\FerramAerospaceResearch\Plugins\Scale_Redist.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

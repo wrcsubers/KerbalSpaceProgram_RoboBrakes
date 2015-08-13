@@ -1,26 +1,46 @@
 ===========================================================================================================
+RoboBrakes v0.3 - Unreleased
+===========================================================================================================
+* Added the option to Zero Throttle immediately upon landing regardless of Activation Delay.
+* Added the option to Deploy Parachute immediately upon landing regardless of Activation Delay.
+* Added Support for Ferram Aerospace Research!
+    * Parts are activated by right clicking and enabling RoboBrakes.
+    * Aero parts must have the 'Spoiler' option enabled for RoboBrakes to work.
+    * Real Chutes Lite works similar to stock RoboBrakes chutes and are deployed/repacked automatically. 
+    * --NOTE-- I suggest turning OFF the default group for Spoilers at the main FAR menu
+    * --NOTE-- Real Chutes take longer to deploy, I would suggest turning off the 'Delay Parachute' option in the RoboBrakes Settings Menu.
+* Fixed a bug allowing RoboBrakes to automatically enable after a landing and deactivation.  RoboBrakes can now not be automatically triggered until taking off again.
+
+===========================================================================================================
 RoboBrakes v0.2 - 08.03.15
 ===========================================================================================================
-* Persistent settings!
-  - User settings are now saved globally, including Window positions.
-  - Settings are Loaded/Saved at the Beginning/End of each flight.
-  - Settings are NOT per ship at this time.
+* Persistent settings
+    * User settings are now saved globally, including Window positions.
+    * Settings are Loaded/Saved at the Beginning/End of each flight.
+    * Settings are NOT per ship at this time.
 * Moved 'Settings' to it's own window.  This gives more room to work with in the future and is cleaner looking.
 * Removed the Warning for undeployed gear(I found it somewhat annoying).
 * System is automatically Disarmed once the Deactivation Speed is reached.
 * Added Parachute functionality.
-  - Parachutes deploy with Gear/Aero brakes upon landing, in accordance with the Activation Delay setting.
-  - Once Deactivation Speed is reached Parachutes are Cut & Repacked Automatically.
-  - If Parachutes are cut manually, they are repacked at the next takeoff.
+    * Parachutes deploy with Gear/Aero brakes upon landing, in accordance with the Activation Delay setting.
+    * Once Deactivation Speed is reached Parachutes are Cut & Repacked Automatically.
+    * If Parachutes are cut manually, they are repacked at the next takeoff.
 * Updated GUI to reflect changes.
 * Added ability in settings to select which class of part (Gear/Aero/Chute) you want to activate.
-  - Automatic (Deployed with Activation Timer on Landing).
-  - Override (Deployed while pressing the 'B' Key).
-  - Chutes cannot be over-ridden as it presents a bit of a safety hazard ;-)
-  - You can have one or both of the selections activated.
+    * Automatic (Deployed with Activation Timer on Landing).
+    * Override (Deployed while pressing the 'B' Key).
+    * You can have one or both of the selections activated.
+    * --NOTE-- Chutes cannot be over-ridden as it presents a bit of a safety hazard ;-)
 * Adjusted Activation/Deactivation Logic to improve functionality.
 * Organized Code so that Variables and functions have better readability.
 * Moved GUI Display updates to 'Update' method so they are updated before the settings window is opened and more often.
+
+**Installation**
+
+1. Remove and old version of RoboBrakes by deleting it from your GameData folder.
+2. Copy NEW RoboBrakes folder the into GameData folder of KSP.
+
+--NOTE-- Persistent settings are generated automatically upon the first run with the default values.  You can find this file under RoboBrakes\Config\RoboBrakes_PluginSettings.cfg
 
 ===========================================================================================================
 RoboBrakes v0.1 - 07.27.15

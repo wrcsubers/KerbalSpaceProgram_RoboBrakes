@@ -28,6 +28,8 @@
 //=====================================================================================
 //=====================================================================================
 //
+// Version 0.3 - Unreleased
+// Version 0.2 - Released 08.03.2015
 // Version 0.1 - Initial Release - 07.27.2015
 //
 
@@ -86,7 +88,7 @@ namespace RoboBrakes
 		private float SettingsGUI_WindowTop = 190;
 		private float SettingsGUI_WindowLeft = ((Screen.width / 2) + 150);
 		private float SettingsGUI_WindowWidth = 220;
-		private float SettingsGUI_WindowHeight = 240;
+		private float SettingsGUI_WindowHeight = 250;
 		private float SelectionGridX;
 		private float SelectionGridY;
 
@@ -109,6 +111,9 @@ namespace RoboBrakes
 		private bool RBSettings_BKeyOff = false;
 		//Throttle Zero Setting - Enabled by default
 		private bool RBSettings_ThrottleZeroing = true;
+		private bool RBSettings_TZWaitForDelay = true;
+		//Parachute Delay Setting - Enabled by default
+		private bool RBSettings_DelayChute = true;
 		//Enabled Part Classes - These get changed in settings.  ChuteOverride is disabled by default, all others are enabled.
 		private bool RoboBrakes_GEARAUTO = true;
 		private bool RoboBrakes_GEAROVERRIDE = true;
@@ -160,8 +165,6 @@ namespace RoboBrakes
 		private bool RoboBrakes_CHUTEREADY;
 		private bool RoboBrakes_CUTCHUTE;
 
-		public bool ShowChuteRepack;
-
 		//============================================================================================================================================
 		//Start Running Processes
 		//============================================================================================================================================
@@ -182,7 +185,7 @@ namespace RoboBrakes
 			RoboBrakes_SystemSettings = new ConfigNode ();
 			RoboBrakes_SystemSettings = ConfigNode.Load ("GameData/RoboBrakes/Config/RoboBrakes_PluginSettings.cfg");
 			if (RoboBrakes_SystemSettings != null) {
-				print ("ROBOBRAKES - Settings exist! Loading Values...");
+				print  ("ROBOBRAKES - Settings exist! Loading Values...");
 				//--------------------------------------------------------------------------------------------------
 				MainGUI_WindowTop = float.Parse (RoboBrakes_SystemSettings.GetValue ("MainGUI_WindowTop"));
 				MainGUI_WindowLeft = float.Parse (RoboBrakes_SystemSettings.GetValue ("MainGUI_WindowLeft"));
@@ -195,6 +198,8 @@ namespace RoboBrakes
 				RBSettings_BKeyToggle = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RBSettings_BKeyToggle"));
 				RBSettings_BKeyOff = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RBSettings_BKeyOff"));
 				RBSettings_ThrottleZeroing = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RBSettings_ThrottleZeroing"));
+				RBSettings_TZWaitForDelay = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RBSettings_TZWaitForDelay"));
+				RBSettings_DelayChute = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RBSettings_DelayChute"));
 				//--------------------------------------------------------------------------------------------------
 				RoboBrakes_GEARAUTO = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RoboBrakes_GEARAUTO"));
 				RoboBrakes_AEROAUTO = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RoboBrakes_AEROAUTO"));
@@ -204,7 +209,7 @@ namespace RoboBrakes
 				RoboBrakes_CHUTEOVERRIDE = Boolean.Parse (RoboBrakes_SystemSettings.GetValue ("RoboBrakes_CHUTEOVERRIDE"));
 				//--------------------------------------------------------------------------------------------------
 			} else {
-				print ("ROBOBRAKES - Settings don't exist! Creating new file with built in defaults...");
+				print  ("ROBOBRAKES - Settings don't exist! Creating new file with built in defaults...");
 				SaveSettings ();
 			}
 			RenderingManager.AddToPostDrawQueue (0, OnDraw);
@@ -298,13 +303,13 @@ namespace RoboBrakes
 				if (RoboBrakes_HASPARTENABLED == false) {
 					GUIContent ArmDisarmSwitch = new GUIContent ("<b><color=#777777>Arm/Disarm</color></b>");
 					if (GUI.Button (new Rect (40, 20, 120, 22), ArmDisarmSwitch) == true) {
-						print ("ROBOBRAKES - Cannot Arm System: No Eligible Parts are Enabled!");
+						print  ("ROBOBRAKES - Cannot Arm System: No Eligible Parts are Enabled!");
 					}
 				} else {
 					GUIContent ArmDisarmSwitch = new GUIContent ("<b><color=white>Arm/Disarm</color></b>");
 					if (GUI.Button (new Rect (40, 20, 120, 22), ArmDisarmSwitch) == true) {
 						RoboBrakes_ARMED = true;
-						print ("ROBOBRAKES - System Manually Armed!");
+						print  ("ROBOBRAKES - System Manually Armed!");
 					}
 				}
 			}
@@ -312,7 +317,7 @@ namespace RoboBrakes
 				GUIContent ArmDisarmSwitch = new GUIContent ("<b><color=white>Arm/Disarm</color></b>");
 				if (GUI.Button (new Rect (40, 20, 120, 22), ArmDisarmSwitch) == true) {
 					RoboBrakes_ARMED = false;
-					print ("ROBOBRAKES - System Manually Disarmed!");
+					print  ("ROBOBRAKES - System Manually Disarmed!");
 				}
 			}
 			//Display Boxes...
@@ -373,7 +378,7 @@ namespace RoboBrakes
 			//Brake Override Settings - Each press of the button toggles between Off, Press, Toggle
 			//---------------------------------------------------------------------------------------------------------------------
 			GUI.Label (new Rect (25, 77, 100, 17), "Brake Override: ");
-			//B Key Off
+			//Brake Override Off
 			if (RBSettings_BKeyOff) {
 				GUIContent BSetting = new GUIContent ("<b><color=grey>Off</color></b>");
 				if (GUI.Button (new Rect (130, 77, 65, 17), BSetting) == true) {
@@ -384,7 +389,7 @@ namespace RoboBrakes
 				//Turn Brakes Off if they are engaged when modes are switched
 				RoboBrakes_OVERRIDEBRAKE_ACTIVE = false;
 			}
-			//B Key Press/Hold
+			//Brake Override Press/Hold
 			if (RBSettings_BKeyPress) {
 				GUIContent BSetting = new GUIContent ("<b><color=white>Hold</color></b>");
 				if (GUI.Button (new Rect (130, 77, 65, 17), BSetting) == true) {
@@ -393,7 +398,7 @@ namespace RoboBrakes
 					RBSettings_BKeyToggle = true;
 				}
 			}
-			//B Key Toggle
+			//Brake Override Toggle
 			if (RBSettings_BKeyToggle) {
 				GUIContent BSetting = new GUIContent ("<b><color=white>Toggle</color></b>");
 				if (GUI.Button (new Rect (130, 77, 65, 17), BSetting) == true) {
@@ -420,11 +425,81 @@ namespace RoboBrakes
 					RBSettings_ThrottleZeroing = true;
 				}
 			}
+			//---------------------------------------------------------------------------------------------------------------------
+			if (RBSettings_ThrottleZeroing == true) {
+				GUI.Label (new Rect (25, 120, 120, 17), "<color=white>Delay Throttle 0: </color>");
+			} else {
+				//Show greyed out label if Throttle Zeroing isn't enabled
+				GUI.Label (new Rect (25, 120, 120, 17), "<color=grey>Delay Throttle 0: </color>");
+			}
+			//Throttle Zeroing Wait for Delay On
+			if (RBSettings_TZWaitForDelay == true) {
+				if (RBSettings_ThrottleZeroing == true) {
+					GUIContent ThrottleZSetting = new GUIContent ("<b><color=white>Yes</color></b>");
+					if (GUI.Button (new Rect (130, 120, 65, 17), ThrottleZSetting) == true) {
+						RBSettings_TZWaitForDelay = false;
+					}
+				} else {
+					GUIContent ThrottleZSetting = new GUIContent ("<b><color=grey>Yes</color></b>");
+					if (GUI.Button (new Rect (130, 120, 65, 17), ThrottleZSetting) == true) {
+						RBSettings_TZWaitForDelay = false;
+					}
+				}
+			}
+			if (RBSettings_TZWaitForDelay == false) {
+				if (RBSettings_ThrottleZeroing == true) {
+					GUIContent ThrottleZSetting = new GUIContent ("<b><color=white>No</color></b>");
+					if (GUI.Button (new Rect (130, 120, 65, 17), ThrottleZSetting) == true) {
+						RBSettings_TZWaitForDelay = true;
+					}
+				} else {
+					GUIContent ThrottleZSetting = new GUIContent ("<b><color=grey>No</color></b>");
+					if (GUI.Button (new Rect (130, 120, 65, 17), ThrottleZSetting) == true) {
+						RBSettings_TZWaitForDelay = true;
+					}
+				}
+			}
+			//Parachute Delay Toggle
+			//---------------------------------------------------------------------------------------------------------------------
+			if (RoboBrakes_CHUTEAUTO == true) {
+				GUI.Label (new Rect (25, 142, 120, 17), "<color=white>Delay Parachute: </color>");
+			} else {
+				//Show greyed out label if Automatic Chute isn't enabled
+				GUI.Label (new Rect (25, 142, 120, 17), "<color=grey>Delay Parachute: </color>");
+			}
+			//Parachute Wait for Delay On
+			if (RBSettings_DelayChute == true) {
+				if (RoboBrakes_CHUTEAUTO == true) {
+					GUIContent ChuteDelaySetting = new GUIContent ("<b><color=white>Yes</color></b>");
+					if (GUI.Button (new Rect (130, 142, 65, 17), ChuteDelaySetting) == true) {
+						RBSettings_DelayChute = false;
+					}
+				} else {
+					GUIContent ChuteDelaySetting = new GUIContent ("<b><color=grey>Yes</color></b>");
+					if (GUI.Button (new Rect (130, 142, 65, 17), ChuteDelaySetting) == true) {
+						RBSettings_DelayChute = false;
+					}
+				}
+			}
+			if (RBSettings_DelayChute == false) {
+				if (RoboBrakes_CHUTEAUTO == true) {
+					GUIContent ChuteDelaySetting = new GUIContent ("<b><color=white>No</color></b>");
+					if (GUI.Button (new Rect (130, 142, 65, 17), ChuteDelaySetting) == true) {
+						RBSettings_DelayChute = true;
+					}
+				} else {
+					GUIContent ChuteDelaySetting = new GUIContent ("<b><color=grey>No</color></b>");
+					if (GUI.Button (new Rect (130, 142, 65, 17), ChuteDelaySetting) == true) {
+						RBSettings_DelayChute = true;
+					}
+				}
+			}
 	
 			//Selection Grid
 			//---------------------------------------------------------------------------------------------------------------------
+			//Change these two values to move entire grid up/down/left/right
 			SelectionGridX = 10;
-			SelectionGridY = 155;
+			SelectionGridY = 165;
 			GUI.Label (new Rect (SelectionGridX, SelectionGridY + 2, 200, 10), "<color=#222222>__________________________________</color>");
 			GUI.Label (new Rect (SelectionGridX + 5, SelectionGridY + 20, 70, 17), "Automatic:");
 			GUI.Label (new Rect (SelectionGridX + 15, SelectionGridY + 40, 70, 17), "Override:");
@@ -442,13 +517,13 @@ namespace RoboBrakes
 			if (GUI.Toggle (new Rect (SelectionGridX + 165, SelectionGridY + 18, 17, 17), RoboBrakes_CHUTEAUTO, "") != RoboBrakes_CHUTEAUTO)
 				RoboBrakes_CHUTEAUTO = !RoboBrakes_CHUTEAUTO;
 			//if (GUI.Toggle (new Rect (SelectionGridX + 165, SelectionGridY + 38, 17, 17), RoboBrakes_CHUTEOVERRIDE, "") != RoboBrakes_CHUTEOVERRIDE)
-				//RoboBrakes_CHUTEOVERRIDE = !RoboBrakes_CHUTEOVERRIDE;
+			//RoboBrakes_CHUTEOVERRIDE = !RoboBrakes_CHUTEOVERRIDE;
 			GUI.Label (new Rect (SelectionGridX, SelectionGridY + 56, 200, 10), "<color=#222222>__________________________________</color>");
 
 			//Okay Button
 			//---------------------------------------------------------------------------------------------------------------------
 			GUIContent OkayClose = new GUIContent ("<b><color=white>Okay</color></b>");
-			if (GUI.Button (new Rect (87, 218, 46, 17), OkayClose) == true) {
+			if (GUI.Button (new Rect (87, 228, 46, 17), OkayClose) == true) {
 				ShowSettingsGUI = false;
 				SaveSettings ();
 			}
@@ -468,9 +543,19 @@ namespace RoboBrakes
 		//This is a trigger to run actions ONE TIME upon Landing...
 		private void LandingTrigger ()
 		{
-			print ("ROBOBRAKES - Landing!");
+			print  ("ROBOBRAKES - Landing!");
 			//Start Activation Delay Timer
 			if (RoboBrakes_ARMED) {
+				//Kill throttle if the delay is turned off
+				if (RBSettings_TZWaitForDelay == false) {
+					if (RBSettings_ThrottleZeroing == true) {
+						FlightInputHandler.state.mainThrottle = 0;
+					}
+				}
+				//Trigger Chute if the delay is turned off
+				if (RBSettings_DelayChute == false) {
+					RoboBrakes_CHUTEREADY = true;
+				}
 				//This starts TimerTime2 if the Activation Delay is greater than 0. If Activation delay is set to 0, timer is assumed to be done
 				if (ActivationDelay > 0) {
 					TimerTime2Done = false;
@@ -510,12 +595,17 @@ namespace RoboBrakes
 		//Triggered by completion of the Activation Delay timer
 		private void TimerCompleteTrigger ()
 		{
-			print ("ROBOBRAKES - Activation " + TimerTime2.ToString("N1") + "s after landing!");
+			print  ("ROBOBRAKES - Activation " + TimerTime2.ToString ("N1") + "s after landing!");
 			RoboBrakes_READYFORACTIVATION = true;
-			RoboBrakes_CHUTEREADY = true;
+			//Trigger Chute when Timer Completes
+			if (RBSettings_DelayChute == true) {
+				RoboBrakes_CHUTEREADY = true;
+			}
 			//Set Throttle to Zero when the Timer completes, if that option is enabled
-			if (RBSettings_ThrottleZeroing == true) {
-				FlightInputHandler.state.mainThrottle = 0;
+			if (RBSettings_TZWaitForDelay == true) {
+				if (RBSettings_ThrottleZeroing == true) {
+					FlightInputHandler.state.mainThrottle = 0;
+				}
 			}
 		}
 
@@ -524,7 +614,8 @@ namespace RoboBrakes
 			RoboBrakes_CUTCHUTE = true;
 			RoboBrakes_ARMED = false;
 			RoboBrakes_AUTOMATICBRAKE_ACTIVE = false;
-			print ("ROBOBRAKES - Automatically Deactivated and Disarmed at " + GroundSpeed.ToString("N1") + "m/s!");
+			RoboBrakes_READYFORACTIVATION = false;
+			print  ("ROBOBRAKES - Automatically Deactivated and Disarmed at " + GroundSpeed.ToString ("N1") + "m/s!");
 		}
 			
 		//This method runs every physics frame
@@ -588,7 +679,7 @@ namespace RoboBrakes
 						CapablePartList.Add (RoboBrakeCapablePart);
 					}
 				}
-				print ("ROBOBRAKES - Count Complete! Number of RoboBrakable parts is " + CapablePartList.Count ());
+				print  ("ROBOBRAKES - Count Complete! Number of RoboBrakable parts is " + CapablePartList.Count ());
 			}
 
 			//---------------------------------------------------------------------------------------------------------------------
@@ -746,7 +837,7 @@ namespace RoboBrakes
 
 			//---------------------------------------------------------------------------------------------------------------------
 			//Reset Counters - This must be after everything else
-			ResetCounters();
+			ResetCounters ();
 		}
 
 		//============================================================================================================================================
@@ -830,6 +921,30 @@ namespace RoboBrakes
 		//============================================================================================================================================
 		public void EngageAero ()
 		{
+			//FAR Compatibility =)
+			foreach (Part EnabledPart in EnabledPartList) {
+				if (EnabledPart.Modules.Contains ("FARControllableSurface")) {
+					ferram4.FARControllableSurface FCS = new ferram4.FARControllableSurface ();
+					FCS = EnabledPart.FindModuleImplementing<ferram4.FARControllableSurface> ();
+					if (FCS.isSpoiler) {
+						RoboBrakes_AeroEnabledCount++;
+						BaseActionList BAL = new BaseActionList (EnabledPart, FCS); 
+						foreach (BaseAction BA in BAL) { 
+							if ((RoboBrakes_AUTOMATICBRAKE_ACTIVE == true && RoboBrakes_AEROAUTO == true) | (RoboBrakes_OVERRIDEBRAKE_ACTIVE == true && RoboBrakes_AEROOVERRIDE == true)) {
+								if (BA.guiName == "Activate Spoiler") {
+									KSPActionParam AP = new KSPActionParam (KSPActionGroup.None, KSPActionType.Activate); 
+									BA.Invoke (AP);
+								}
+							} else {
+								if (BA.guiName == "Activate Spoiler") {
+									KSPActionParam AP = new KSPActionParam (KSPActionGroup.None, KSPActionType.Deactivate); 
+									BA.Invoke (AP); 
+								}
+							}
+						}
+					}
+				}
+			}
 			foreach (Part EnabledPart in EnabledPartList) {
 				//---------------------------------------------------------------------------------------------------------------------
 				//Control Surface Module
@@ -880,6 +995,44 @@ namespace RoboBrakes
 		//============================================================================================================================================
 		public void EngageChute ()
 		{
+			//FAR Compatibility =)
+			foreach (Part EnabledPart in EnabledPartList) {
+				if (EnabledPart.Modules.Contains ("RealChuteFAR")) {
+					FerramAerospaceResearch.RealChuteLite.RealChuteFAR RCF = new FerramAerospaceResearch.RealChuteLite.RealChuteFAR ();
+					RCF = EnabledPart.FindModuleImplementing<FerramAerospaceResearch.RealChuteLite.RealChuteFAR> ();
+					RoboBrakes_ParaEnabledCount++;
+					if ((RCF.deploymentState.Equals (FerramAerospaceResearch.RealChuteLite.RealChuteFAR.DeploymentStates.CUT)) && (IsLanded == false) && (RoboBrakes_CHUTEAUTO == true)) {
+						//Bypassing RealChutes Repacking Method so we don't have to EVA
+						RCF.part.Effect ("rcrepack");
+						RCF.part.stackIcon.SetIconColor (XKCDColors.White);
+						RCF.deploymentState = FerramAerospaceResearch.RealChuteLite.RealChuteFAR.DeploymentStates.STOWED;
+						RCF.part.DragCubes.SetCubeWeight ("PACKED", 1);
+						RCF.part.DragCubes.SetCubeWeight ("RCDEPLOYED", 0);
+						print  ("ROBOBRAKES - RealChute " + EnabledPart.name + " was already Cut! Repacked Automatically!");
+					}
+					//Deploy Chute
+					if ((RoboBrakes_CHUTEREADY == true && RoboBrakes_CHUTEAUTO == true)) {
+							RoboBrakes_CHUTEREADY = false;
+							//Deploy Real Chute
+							RCF.ActivateRC ();
+					}
+					//Repack Chute
+					if (RCF.deploymentState.Equals (FerramAerospaceResearch.RealChuteLite.RealChuteFAR.DeploymentStates.DEPLOYED | FerramAerospaceResearch.RealChuteLite.RealChuteFAR.DeploymentStates.PREDEPLOYED)) {
+						if (RoboBrakes_CUTCHUTE == true) {
+							RoboBrakes_CUTCHUTE = false;
+							//Cut Real Chute
+							RCF.Cut ();
+							//Bypassing RealChutes Repacking Method so we don't have to EVA
+							RCF.part.Effect ("rcrepack");
+							RCF.part.stackIcon.SetIconColor (XKCDColors.White);
+							RCF.deploymentState = FerramAerospaceResearch.RealChuteLite.RealChuteFAR.DeploymentStates.STOWED;
+							RCF.part.DragCubes.SetCubeWeight ("PACKED", 1);
+							RCF.part.DragCubes.SetCubeWeight ("RCDEPLOYED", 0);
+							print  ("ROBOBRAKES - RealChute " + EnabledPart.name + " was Cut & Repacked Automatically!");
+						}
+					}
+				}
+			}
 			foreach (Part EnabledPart in EnabledPartList) {
 				//Module Parachutes
 				//---------------------------------------------------------------------------------------------------------------------
@@ -890,7 +1043,7 @@ namespace RoboBrakes
 					//Repack the Chute automatically if it has been manually cut
 					if ((MPA.deploymentState.Equals (ModuleParachute.deploymentStates.CUT)) && (IsLanded == false) && (RoboBrakes_CHUTEAUTO == true)) {
 						MPA.Repack ();
-						print ("ROBOBRAKES - Chute " + EnabledPart.name + " was already Cut! Repacked Automatically!");
+						print  ("ROBOBRAKES - Chute " + EnabledPart.name + " was already Cut! Repacked Automatically!");
 					}
 					//Deploy Chute
 					if ((RoboBrakes_AUTOMATICBRAKE_ACTIVE == true && RoboBrakes_CHUTEAUTO == true)) {
@@ -905,7 +1058,7 @@ namespace RoboBrakes
 							RoboBrakes_CUTCHUTE = false;
 							MPA.CutParachute ();
 							MPA.Repack ();
-							print ("ROBOBRAKES - Chute " + EnabledPart.name + " was Cut & Repacked Automatically!");
+							print  ("ROBOBRAKES - Chute " + EnabledPart.name + " was Cut & Repacked Automatically!");
 						}
 					}
 				}
@@ -913,7 +1066,7 @@ namespace RoboBrakes
 		}
 		//============================================================================================================================================
 		//Resets various counters and lists when called
-		private void ResetCounters()
+		private void ResetCounters ()
 		{
 			RoboBrakes_AeroEnabledCount = 0;
 			RoboBrakes_GearEnabledCount = 0;
@@ -933,12 +1086,12 @@ namespace RoboBrakes
 			if (RoboBrakes_ToolbarButton != null) {
 				ApplicationLauncher.Instance.RemoveModApplication (RoboBrakes_ToolbarButton);
 			}
-			print ("ROBOBRAKES - Bye bye...");
+			print  ("ROBOBRAKES - Bye bye...");
 		}
 
 		//============================================================================================================================================
 		//Called manually if triggered by user.
-		public void LoadDefaultSettings()
+		public void LoadDefaultSettings ()
 		{
 			MainGUI_WindowTop = 5;
 			MainGUI_WindowLeft = ((Screen.width / 2) + 150);
@@ -954,6 +1107,9 @@ namespace RoboBrakes
 			RBSettings_BKeyOff = false;
 			//Throttle Zero Setting - Enabled by default
 			RBSettings_ThrottleZeroing = true;
+			RBSettings_TZWaitForDelay = true;
+			//Parachute Delay Setting - Enabled by default
+			RBSettings_DelayChute = true;
 			//Enabled Part Classes - These get changed in settings.  ChuteOverride is disabled by default, all others are enabled.
 			RoboBrakes_GEARAUTO = true;
 			RoboBrakes_GEAROVERRIDE = true;
@@ -962,7 +1118,7 @@ namespace RoboBrakes
 			RoboBrakes_CHUTEAUTO = true;
 			RoboBrakes_CHUTEOVERRIDE = false;
 			SaveSettings ();
-			print ("ROBOBRAKES - Default Settings Loaded and Settings Saved!");
+			print  ("ROBOBRAKES - Default Settings Loaded and Settings Saved!");
 		}
 
 		//============================================================================================================================================
@@ -981,6 +1137,8 @@ namespace RoboBrakes
 			RoboBrakes_SystemSettings.AddValue ("RBSettings_BKeyToggle", RBSettings_BKeyToggle);
 			RoboBrakes_SystemSettings.AddValue ("RBSettings_BKeyOff", RBSettings_BKeyOff);
 			RoboBrakes_SystemSettings.AddValue ("RBSettings_ThrottleZeroing", RBSettings_ThrottleZeroing);
+			RoboBrakes_SystemSettings.AddValue ("RBSettings_TZWaitForDelay", RBSettings_TZWaitForDelay);
+			RoboBrakes_SystemSettings.AddValue ("RBSettings_DelayChute", RBSettings_DelayChute);
 			//--------------------------------------------------------------------------------------------------
 			RoboBrakes_SystemSettings.AddValue ("RoboBrakes_GEARAUTO", RoboBrakes_GEARAUTO);
 			RoboBrakes_SystemSettings.AddValue ("RoboBrakes_AEROAUTO", RoboBrakes_AEROAUTO);
@@ -990,7 +1148,7 @@ namespace RoboBrakes
 			RoboBrakes_SystemSettings.AddValue ("RoboBrakes_CHUTEOVERRIDE", RoboBrakes_CHUTEOVERRIDE);
 			//--------------------------------------------------------------------------------------------------
 			RoboBrakes_SystemSettings.Save ("GameData/RoboBrakes/Config/RoboBrakes_PluginSettings.cfg", "These are the default settings unless changed by the user...");
-			print ("ROBOBRAKES - Settings Saved!");
+			print  ("ROBOBRAKES - Settings Saved!");
 		}
 	}
 }
