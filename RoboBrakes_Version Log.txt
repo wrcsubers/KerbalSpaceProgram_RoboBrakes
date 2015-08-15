@@ -1,14 +1,14 @@
 ===========================================================================================================
-RoboBrakes v0.3 - Unreleased
+RoboBrakes v0.3 - 08.14.15
 ===========================================================================================================
-* Added the option to Zero Throttle immediately upon landing regardless of Activation Delay.
-* Added the option to Deploy Parachute immediately upon landing regardless of Activation Delay.
 * Added Support for Ferram Aerospace Research!
     * Parts are activated by right clicking and enabling RoboBrakes.
     * Aero parts must have the 'Spoiler' option enabled for RoboBrakes to work.
     * Real Chutes Lite works similar to stock RoboBrakes chutes and are deployed/repacked automatically. 
     * --NOTE-- I suggest turning OFF the default group for Spoilers at the main FAR menu
     * --NOTE-- Real Chutes take longer to deploy, I would suggest turning off the 'Delay Parachute' option in the RoboBrakes Settings Menu.
+* Added the option to Zero Throttle immediately upon landing regardless of Activation Delay.
+* Added the option to Deploy Parachute immediately upon landing regardless of Activation Delay.
 * Fixed a bug allowing RoboBrakes to automatically enable after a landing and deactivation.  RoboBrakes can now not be automatically triggered until taking off again.
 
 ===========================================================================================================
