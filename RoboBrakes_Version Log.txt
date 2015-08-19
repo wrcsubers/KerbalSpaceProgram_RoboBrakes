@@ -1,7 +1,17 @@
+****Installation****
+
+1. Remove and old version of RoboBrakes by deleting it from your GameData folder.
+   - If you want to keep your settings, save the file described below.
+2. Copy NEW RoboBrakes folder the into GameData folder of KSP.
+   - ModuleManager should be in your GameData folder NOT in the RoboBrakes folder.
+
+--NOTE-- Persistent settings are generated automatically upon the first run with the default values.  You can find this file under RoboBrakes\Config\RoboBrakes_PluginSettings.cfg
+
+
 ===========================================================================================================
 RoboBrakes v0.3.1 - 08.18.15
 ===========================================================================================================
-* Fixed stock compatibility issues after FAR Update - I fail at testing my own release lol
+* Fixed stock compatibility issues after FAR Update
 
 ===========================================================================================================
 RoboBrakes v0.3 - 08.14.15
@@ -39,13 +49,6 @@ RoboBrakes v0.2 - 08.03.15
 * Adjusted Activation/Deactivation Logic to improve functionality.
 * Organized Code so that Variables and functions have better readability.
 * Moved GUI Display updates to 'Update' method so they are updated before the settings window is opened and more often.
-
-**Installation**
-
-1. Remove and old version of RoboBrakes by deleting it from your GameData folder.
-2. Copy NEW RoboBrakes folder the into GameData folder of KSP.
-
---NOTE-- Persistent settings are generated automatically upon the first run with the default values.  You can find this file under RoboBrakes\Config\RoboBrakes_PluginSettings.cfg
 
 ===========================================================================================================
 RoboBrakes v0.1 - 07.27.15
