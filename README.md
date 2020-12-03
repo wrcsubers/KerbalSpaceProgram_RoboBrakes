@@ -1,9 +1,7 @@
-#RoboBrakes
+# RoboBrakes: A mod for Kerbal Space Program
 
-Automatic Braking System for Kerbal Space Program
+### Robo Brakes allows for better brake control by automating braking systems during Landing. You can chose which parts you want to act as brakes, including Landing Gear and Aero Surfaces.
 
-Robo Brakes allows for better brake control by automating braking systems during Landing. You can chose which parts you want to act as brakes, including Landing Gear and Aero Surfaces. Parts are enabled/disabled by right clicking on them in the Editor or during Flight.
+Parts are enabled/disabled by right clicking on them in the Editor or during Flight.
 
-This project is in heavy development so please check the To-Do log or the Version History for constant updates on RoboBrakes.
-
-=)
+-- This project is no longer in development and is provided for archive purposes only. --
